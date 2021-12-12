@@ -1,0 +1,204 @@
+<p>
+1) [Uncollapsed, Horizontal, 64x64] Do nothing<br/>
+<ul><li>The QTopMenuGridGroup shows correct initial state: uncollapsed, horizontal 64x64</li>
+</ul>
+</p>
+<p>
+
+<p>
+2) [Uncollapsed, Horizontal, 64x64] Do nothing<br/>
+<ul><li>All the buttons are displayed. </li>
+<li>Widgets on the same column are aligned on their left side. </li>
+<li>Top side of all widgets align on cells limits</li>
+<li>The QTopMenuGridGroup size is adapted to the content.</li>
+<li>The group label is shown below the buttons.</li>
+</ul>
+</p>
+<p>
+
+<p>
+3) [Uncollapsed, Horizontal, 64x64] Change OS color to another scheme (and restaure after this test). Check with Bright and Dark schemes<br/>
+<ul>
+<li>All Icons of widgets adapt to the new scheme imediately. </li>
+</ul>
+</p>
+<p>
+
+<p>
+4) [Uncollapsed, Horizontal, 64x64] Hover a button<br/>
+<ul>
+<li>The button show hover effect. </li>
+</ul>
+</p>
+<p>
+
+<p>
+5) [Uncollapsed, Horizontal, 64x64] Press and keep pressed a button<br/>
+<ul>
+<li>The button show pressed effect effect. </li>
+</ul>
+</p>
+<p>
+
+<p>
+6) [Uncollapsed, Horizontal, 64x64] Click on buttons<br/>
+<ul>
+<li>The log shows feedback of that click. </li>
+</ul>
+</p>
+<p>
+
+<p>
+7) [Uncollapsed, Horizontal, 64x64] Press on a button, while pressed, move the cursor outside, and then inside again of the button area, then release.<br/>
+<ul>
+<li>The pressed effect stops when going outside of the button area. </li>
+<li>The pressed effect does NOT restart entering the button area again. </li>
+<li>No log show no new click events. </li>
+</ul>
+</p>
+<p>
+
+8) [Uncollapsed, 64x64] Switch to Vertical (Switch back to horizontal after the test)<br/>
+<ul><li>All the buttons are displayed. </li>
+<li>Widgets on the same row are aligned on their top side. </li>
+<li>Left side of all widgets align on cells limits</li>
+<li>The QTopMenuGridGroup size is adapted to the content.</li></ul>
+</p>
+
+<p>
+9) [Horizontal, 64x64] Set collapsed to true<br />
+<ul>
+<li>All buttons desapear except one single showing the group label, icon and drop-down arrow (The group-button).</li>
+<li>Hover (test 4), Pressed (test 5) and Clicked (tests 6 and 7) apply to that "group-button".</li>
+<li>The size of the QTopMenuGridGroup is adapted to just that group-button</li>
+<li>The label of the group is still shown</li>
+<li>An arrow is shown to indicate the popup capability</li>
+</ul>
+</p>
+
+<p>
+10) [Collapsed, Horizontal, 64x64] Click on the group-button (then press esc after the test)<br/> 
+<ul>
+<li>A popup is positionned at the bottom, containing all the buttons of the group.</li>
+<li>Buttons in that group respond to Hover, even after the cursor moved to: 1) on buttons, 2) between buttons, 3) on the group-button, 4) totally outside.</li>
+<li>It is acceptable that the group-button does not respond to hover while the popup is shown.</li>
+</ul>
+</p>
+
+<p>
+11) [Horizontal, 64x64] Set collapsed to false, switch to horizontal, then to vertical, and back to horizontal</br> 
+<ul>
+<li>All the buttons imediately switch between horizontal and vertical alignment.</li>
+<li>All the buttons are visibles, the size of the widget is adapted to the content.</li>
+</ul>
+</p>
+
+
+<p>
+12) [Horizontal, Collapsed] Use keyboard Tab and shift+Tab</br> 
+<ul>
+<li>The GridGroup can be reached in both directions: forward (tab) and backward (shift+tab).</li>
+<li>The focus can leave the GridGroup in both directions.</li>
+</ul>
+</p>
+
+<p>
+13) [Horizontal, Collapsed] Get the focus to the QTopMenuGridGroup.</br> 
+<ul>
+<li>Enter key can be used to trigger the popup.</li>
+<li>Esc key can be used to hide/cancel the popup.</li>
+<li>Numpad Enter key can be used to trigger the popup.</li>
+<li>Space can be used to trigger the popup.</li>
+<li>When the popup is visible, the focus is on one of it child Widgets.</li>
+</ul>
+</p>
+
+<p>
+14) [Horizontal, Collapsed] Trigger the popup.</br> 
+<ul>
+<li>The focus between child widgets follows Columns first and Rows after (The focus order is intuitive, no jumps in the focus order).</li>
+<li>The first time, the focus is set to the first element. Following times the popup is triggered, the latest focussed widget get the focus.</li>
+</ul>
+</p>
+
+<p>
+15) [Horizontal, Collapsed] Disable the widget.</br> 
+<ul>
+<li>Apparence of the widget change colors to disabled colors.</li>
+<li>Clicking on it has no effects, no hover, no pressed effects.</li>
+<li>The QTopMenuGridGroup widget can not get the focus with Tab/Shift+Tab.</li>
+</ul>
+</p>
+
+<p>
+16) [Horizontal, Uncollapsed] Disable the widget.</br> 
+<ul>
+<li>All the sub-widgets buttons become disabled.</li>
+</ul>
+</p>
+
+<p>
+17) [Horizontal, Collapsed] Change the label to "", "Short" and "Very really long label for button"</br> 
+<ul>
+<li>The text is elided in the center when required.</li>
+<li>The width of the QTopMenuGridGroup range from it icon width (+ the margins), to about the double of the icon (+ the margins): It is never smaller than it icon, or bigger than twice the icon width +2x margins.</li>
+<li>The text is elided in the center when required.</li>
+</ul>
+</p>
+
+<p>
+18) [Vertical, Collapsed] Change the label to "", "Short" and "Very really long label for button"</br> 
+<ul>
+<li>The text is elided in the middle when required.</li>
+<li>The height of the QTopMenuGridGroup range from it icon height (+ the margins), to about the double of the icon (+ the margins): It is never smaller than it icon, or bigger than twice the icon width +2x margins.</li>
+<li>The text is elided in the middle when required.</li>
+<li>The label shows rotated 90º CCW.</li>
+<li>The arrow is shown rotated 90º CCW.</li>
+</ul>
+</p>
+
+<p>
+19) [Horizontal/Vertical, Uncollapsed] Change the label to "", "Short" and "Very really long label for button". Check for both, Horizontal and Vertical</br> 
+<ul>
+<li>The text is elided in the center when required.</li>
+</ul>
+</p>
+
+<p>
+20) [Horizontal/Vertical, Uncollapsed/Collapsed] Change the margin to 0, 4 and 8pt. Check for Collapsed and Uncollapsed, and for Horizontal and Vertical</br> 
+<ul>
+<li>The label is elided when required. Changing the margins will adapt the elided text conveniently with the available space.</li>
+<li>The space between sub-widgets buttons is adapted, both vertically and horizontally.</li>
+<li>The space between the (sub-widgets) buttons and the label, and between the label and the arrow, are adapted.</li>
+<li>The external margin around sub-widgets, and around the collapsed button is adapted.</li>
+</ul>
+</p>
+
+<p>
+21) [Horizontal/Vertical, Uncollapsed/Collapsed] Change the cell size to 10, 20 and 30pt</br> 
+<ul>
+<li>All the sub-widgets are resized accordingly.</li>
+<li>The collapsed button is resized accordingly.</li>
+<li>Except when reaching the sub-widgets size limits (which would avoid a pur resizing of the grid), the layout of the different sub-widgets is (proportionally) maintained.</li>
+<li>Switching between several cell sizes, will always draw each of them in exactly the same way. (with, e.g. 20pt, the layout is always the same)</li>
+</ul>
+</p>
+
+<p>
+22) [Horizontal/Vertical, Uncollapsed/Collapsed] Change the tranversal cell number between 1, 2, 3, and 4</br> 
+<ul>
+<li>When using 1: there is only one row (column for Vertical), with all sub-widgets buttons showing the same height. More columns are "produced" to fit those buttons which would otherwise be on the 2-cell or 3-cell.</li>
+<li>When using 2: there is only two rows (columns for Vertical), with all sub-widgets buttons showing either 1-cell or 2-cells height. More columns are "produced" to fit those buttons which would otherwise be on the 3-cell.</li>
+<li>When using 3: there is 3 rows (columns for Vertical), with all sub-widgets buttons showing either 1-cell, 2-cells, or 2-cells height.</li>
+<li>When using 4: Considering that the widgets were inserted in the grid accordingly to a 3-rows arrangement, enabling 4-rows has no effect (it shows exactly as the 3-rows arrangement).</li>
+<li>Switching between several tranversal cell numbers, will always draw each of them in exactly the same way.</li>
+<li>All the sub-widgets buttons are always visible. (except if that sub-widget is incompatible with a given size).</li>
+</ul>
+</p>
+
+<p>
+23) [Horizontal/Vertical] Show/hide the division line</br> 
+<ul>
+<li>The line shows and hide at the right (or bottom for vertical) of the group.</li>
+</ul>
+</p>

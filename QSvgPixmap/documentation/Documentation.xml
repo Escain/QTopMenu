@@ -1,0 +1,137 @@
+<!--
+License GFDL:
+Copyright (C) 2021 Adrian Maire. Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.3 published by the Free Software Foundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts. A copy of the license is located at www.gnu.org/licenses/fdl.txt.
+-->
+<document>
+	<title>QSvgPixmap, QSvgPixmapCache, and QSvgIcon</title>
+
+	<header-1 title="Introduction">
+		<p>QSvgPixmap QSvgPixmapCache and QSvgIcon are classes intended to provide SVG support to 
+		manage images in a graphical user interface (GUI).</p>
+		<p>
+		The simplest, QSvgPixmap is an extended QPixmap for SVG (vectorial images) support. </p>
+		<p>
+		QSvgPixmapCache is a cache to optimize the drawing of a simple SVG with different sizes and colors.</p>
+		<p>
+		QSvgIcon encapsulate the drawing of two SvgPixmapCache, intended to draw icons highly customized 
+		to match the operating system colors, through the usage of two different SVG images.</p>
+
+
+		<p>
+		<b>QSvgPixmap:</b>
+		<ul>
+		<li>Allows load SVG file format images</li>
+		<li>Rendering of the svg is cached for the current size.</li>
+		<li>Several Stretch configurations allows to manage how the SVG is applied to the current size (Cover, Contain, Resized)</li>
+		<li>ColorOverride allows to draw the full image in a single color.</li>
+		</ul> 
+		<b>QSvgIcon:</b>
+		<ul>
+		<li>Cache a QSvgPixmap for each ColorRoleExt (extended version of ColorRoles) and ColorGroup</li>
+		<li>Allow the rendering of two laters of images: one for background, another for foreground.</li>
+		</ul>
+	</p>
+	</header-1>
+
+	<header-1 title="QSvgPixmap">
+	<image src="resources/QSvgPixmap.svg" alt="UML class diagram of QSvgPixmap" 
+			title="UML class diagram"/>
+	<header-2 title="Introduction">
+		<p>QSvgPixmap is a QPixmap for SVG (Scalable Vector Graphic) images.</p>
+		<p>Constructors allow to create a QSvgPixmap from a file path, or from a QByteArray (from memory), or from another QSvgPixmap. After this, the image can not be modified unless re-created.</p>
+		<p><b>Any change to the QSvgPixmap require to render the image. This is an expensive CPU operation, consequently, it is recommended to keep caches and minimize the number of such operations.</b> (Rendering the QSvgPixmap to a QPainter is much cheaper). QSvgPixmapCache is intended for this purpose.</p>
+	</header-2>
+	<header-2 title="Stretch">
+		<p>Stretch property define how the image is applied to the QPixmap size (where proportions do not match).</p>
+		<p><b>Cover:</b> The SVG is scaled up, while keeping it proportions, until it fills the full QPixmap size. Part of the image, which fall outside the QPixmap is not rendered. The center of the image and the center of the QPixmap match.
+		<image src="resources/Stretch_Cover.png" alt="Example of Stretch=Cover QSvgPixmap" 
+			title="Example of Stretch=Cover QSvgPixmap"/>
+		</p>
+		<p><b>Contain:</b> The SVG is scaled down, while keeping it proportions, until all the SVG is visible within the QPixmap. Part of that QPixmap keep transparent.
+		<image src="resources/Stretch_Contain.png" alt="Example of Stretch=Contain QSvgPixmap" 
+			title="Example of Stretch=Contain QSvgPixmap"/>
+		</p>
+		<p><b>Resized:</b> The SVG is scaled to the exact size of the QPixmap. Stretching horizontally or vertically if needed.
+		<image src="resources/Stretch_Resized.png" alt="Example of Stretch=Resized QSvgPixmap" 
+			title="Example of Stretch=Resized QSvgPixmap"/>
+		</p>
+	</header-2>
+	<header-2 title="Color Override">
+	<p>When this color is set (not set to default-constructed QColor), the full SVG is override with this color.</p>
+	<p>This color can be set without re-constructing the QSvgPixmap</p>
+	<image src="resources/ColorOverride.png" alt="Example of QSvgPixmap with color override" 
+			title="Example of QSvgPixmap with color override"/>
+	</header-2>
+
+	<header-2 title="Size">
+	<p>When the size is modified, the QPixmap is rendered. It can be used to adapt the image to the resolution of a widget.</p>
+	</header-2>
+
+	<header-2 title="Considerations about the renderer">
+	<p>Each QSvgPixmap keep internally a QSvgRenderer. The QSvgRenderer read the XML content of the SVG file, parse it, and store it interanlly in a way which make it adequate for rendering. <b>When a QSvgPixmap is copied, the internal QSvgRenderer is shared among them</b>, making the parsing of the file not required. Consequently, copying a QSvgPixmap is much faster and efficient than reading a new one from file or even from memory.</p>
+	</header-2>
+	</header-1>
+
+	<header-1 title="QSvgPixmapCache">
+	<image src="resources/QSvgPixmapCache.svg" alt="UML class diagram of QSvgPixmapcache" 
+			title="UML class diagram"/>
+	<header-2 title="Introduction">
+	<p>QSvgPixmapCache:
+	<ul><li>Allows to apply OS colors to QSvgPixmap</li>
+	<li>Applies the different Qt::ColorRole and QGroup (Escain::ColorRoleExt)</li>
+	<li>Cache QSvgPixmap (with different colors and sizes), for fast rendering.</li></ul>
+	</p>
+	<p>In graphical user interfaces (GUI) it is common scenario to draw images or icons. Usually that icon is part of an interface element (widget) which can interact with the user (hover, pressed, disabled, focus...). The operating system establish a set of standars colors for each of those states, and also for each specific purpose (text, background, selection...). QSvgPixmap is able to draw an image with the required size, and even to override it color with one of those OS-specific color, but most GUI elements requires to have that same image adapted to the color of each situation (e.g when it's hovered, pressed, or disabled). QSvgPixmapCache cache those images over time.</p>
+	<p>QSvgPixmapCache is a cache for a QSvgPixmap with different sizes and colors. To avoid infinite creation of images with different sizes and colors, they need to be identified, making possible to identify when a new image size need to be created, or when an existing image need to be updated with a new size.</p>
+	<p>Size is identified by a simple ID (natural integer of type size_t). By default, only the id 0 (zero) exists, allowing the cache to work out of the box for one single size. Further IDs can be declared (declareId), or forgotten (forgetId). The size for each Id can be queried (size), and set (resize).</p>
+	<p>Each size (id) contains a cache for a set of colors intended to override the QSvgPixmap color (colorOverride), the color is identified by a role and a group as per QColorGroup and QColorRole. Considering that we found the default Qt set of roles unsuficient, ColorRoleExt extends QColorRole with additional values.<br/>
+	</p>
+	</header-2>
+	<header-2 title="Need for a Escain::ColorRoleExt">
+	<p><b>ColorRoleExt provide an extended version of Qt::ColorRole in Qt</b>, it is described with details in QPaletteExt.</p>
+	<p>Qt defines two dimensions for colors: ColorRole specifying the purpose of the color, like text, background, highlight, etc.. It also define the ColorGroup, which define if the widget is disabled, active, inactiv, or Normal. What is missing for our purpose is the user interaction: hover, pressed, focus, etc.. <b>ColorRoleExt makes a combination of the ColorRole with the interactions (hover, pressed, normal...), getting (e.g.) buttonText_Hover, ButtonText_Pressed, or ButtonHighlight_Normal.</b> </p>
+	</header-2>
+	<header-2 title="Changing the OS color set">
+	<p>QSvgPixmapCache not only save the role and group for a color, but also the specific color. This allows to detect if the Operating System changed the default colors. In case the OS changed it color set, the cache is invalidated. Allowing the widget to imediately change it color to the new color scheme.</p>
+	<p>For this reason, it is important to <b>never save a particular QPaletteExt, but rather get a new palette each time the widget is painted</b>. Qt detects color scheme changes and will automatically triger the update of the full GUI.</p>
+	</header-2>
+	<header-2 title="Stretch policy">
+	<p>QSvgPixmapCache also provides Stretch policy, in the same way QSvgPixmap does.</p>
+	</header-2>
+	<header-2 title="ColorOverride">
+	<p>QSvgPixmapCache provide a ColorOverride global attribute, allowing to disable the 'color' component of the cache, and making all the QSvgPixmap to be drawn without ColorOverride and with it internal SVG color. ColorOverride is enabled by default.</p>
+	</header-2>
+
+	</header-1>
+
+	<header-1 title="QSvgIcon">
+	<header-2 title="About the need of QSvgIcon">
+	<p>QIcon can be set in the QAction, and the QIcon drawing can be specialized through QIconEngine. 
+	This design could seem, at first glance, convenient, but after some research it result to be poorly designed:</p>
+	<ul>
+	<li>Default implementation of QIconEngine does not provide the QPalette, consequently, 
+	it can not easily draw the icon with colors of the OS without hacks.</li>
+	<li>QIcon and it QIconEngine are saved into the QAction, not into the QWidget, 
+	thus, each usage of QAction would need to set the proper specialization of QIcon and QIconEngine to have the desired result.</li>
+	<li>Most QIcon methods are not virtual, making the possibility to extends it with custom behavior imposible.</li>
+	<li>The QIconEngine API is poorly designed, taking ownership and forcing to 
+	implement a "clone" function which most likely will imply memory leaks.</li>
+	<li>QAction is not extendible neither, it is not possible to just create a 
+	specialized QAction which always uses the correct QIconEngine.</li>
+	</ul>
+	<p>The other alternative is to reject the QIcon coming from the QAction and 
+	implement a separate API to set/retrieve the icon. This is QSvgIcon</p>
+	<p>While QIcon support SVG format, the name is intentionally similar to QSvgPixmap, 
+	to highlight that  QSvgIcon works on top of QSvgPixmap.</p>
+	</header-2>
+	<header-2 title="Introduction">
+	<p>Having a mono-cromatic image which adapts to the OS color scheme is not enough for a good GUI. QSvgIcon solve this problem by overlapping two images: one background, usually overriden with the OS color scheme, and one foreground, usually without color override. The combination of two images and the possibility of overriding each of the two layers with OS colors make it a tremendously powerful tool to have icons adapted to each situation and OS color scheme.</p>
+	<p>QSvgIcon group two QSvgPixmapCache for a background and foreground icon:
+	<ul><li>Group a background and foreground images, making by their combination the required Icon.</li>
+	<li>Each of the two layers may, or may not take the OS color scheme.</li>
+	<li>The drawing of both images is simplified in one single function.</li></ul>
+	</p>
+
+	</header-2>
+	</header-1>
+</document>

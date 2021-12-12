@@ -1,0 +1,183 @@
+<!--
+License GFDL:
+Copyright (C) 2021 Adrian Maire. Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.3 published by the Free Software Foundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts. A copy of the license is located at www.gnu.org/licenses/fdl.txt.
+-->
+<document>
+	<title>QClickManager &amp; QPaletteExt</title>
+
+	<header-1 title="Introduction">
+		<p>Custom Utils provides several utility classes intended to facilitate very common scenarios while creating custom (Qt) widgets.</p>
+		<p>
+		QClickManager manage events to provide click events (note that a click is not a simple button-press event), press events, and hover events. </p>
+		<p>
+		QPaletteExt is an extended QPalette providing many colors not present in the standard QPalette, like hover/pressed color alternatives.</p>
+
+		<p>
+		<b>QClickManager:</b>
+		<ul>
+		<li>Automatically manage the Widget events to extract more advanced mouse events.</li>
+		<li>Can manage several areas on the widget, making those zones clickable independently.</li>
+		<li>Hover event can be enabled or disabled for efficiency purpose.</li>
+		<li>Provide click events: for a click, the mouse cursor is properly handled so that leaving the widget, or moving further than a threshold will invalidate the click.</li>
+		<li>Provide Press/Release event, in a way which is coherent with click events (e.g. moving the cursor futher than the threshold will trigger release), so that it can be used for widget "pressed" apparence.</li>
+		</ul> 
+		<b>QPaletteExt:</b>
+		<ul>
+		<li>Can be constructed from a standard QPalette.</li>
+		<li>Helps to determinate clear/dark color scheme.</li>
+		<li>Helps with merging colors.</li>
+		<li>Provides a ColorRoleExt (extended ColorRole), and determine additional colors from existing one in QPalette.</li>
+		</ul>
+	</p>
+	</header-1>
+
+	<header-1 title="QClickManager">
+	<header-2 title="Introduction">
+		<p>QClickManager provides a reusable way to manage mouse events in order to get clicks, press/release and hover events.</p>
+		<p>All mouse events are, by default, calculated respective to the full widget area. However, it is possible to register a set of (eventually overlapping) rectangles to consider instead. When one or more click rectangles are registered, the widget area is not anymore considered for mouse events.</p>
+		<header-3 title="Click areas">
+		<p>A set of click rectangles define rectangles to consider for events: for example, one could define 2 click rectangles (possibly overlapping), and a click is only triggered when it falls inside at least one of the two rectangles). 
+		</p>
+		<p>A click rectangle is identified by an ID (integer), which make possible to create, erase, modify and access those rectangles. Additionally, when a event is triggered, it provide the related rectangles.</p>
+		</header-3>
+		<header-3 title="Click">
+		<p>A click is defined as follow:
+		<ol>
+		<li>The user press the first (usually left) button of the mouse over a registered click rectangle (or the full widget area if none is registered)</li>
+		<li>The user keep all the time the cursor within at least one registered click rectangle (or the full widget area if none is registered), and within the widget area.</li>
+		<li>The user release the first (usually left) button of the mouse.</li>
+		</ol>
+		</p>
+		<p>A click is valid if all the 3 steps falls on at least one click rectangle. The event provide the list of valid rectangles (several if overlapping where the click was performed).</p>
+		</header-3>
+		<header-3 title="Pressed">
+		<p>Pressed event is emitted coherently with the click event: A pressed event is emitted when the mouse first button is pushed, as for the click. And a second pressed event (indicating the release) is emitted just before the click event. When a canidate for click is discarded (e.g. the cursor is moved outside the widget or has been moved further than the required hysteresis), the release event is also emitted.
+		</p>
+		</header-3>
+		<header-3 title="Hover">
+		<p>At the contrary than Click and Pressed events, the hover is emitted independently for each registered click rectangle (when the cursor enter or exit those area, even if overlapping). </p>
+		<p>Hover mechanism requires to consider the mouse movement, and considering than mouse move events are triggered much more often than others mouse events, the management of the hover event is more CPU intensive than Click and Pressed events. For this reason, it is disabled by default and requires 2 steps to be enabled:
+		<ol>
+		<li>Enable mouse tracking</li>
+		<li>Enable Hover management</li>
+		</ol>
+		<code lang="C++" title="Enabling hover events">
+setMouseTracking(true);
+m_clickManager.enableHover(*this);
+		</code>
+		</p>
+		
+		</header-3>
+
+	</header-2>
+	<header-2 title="How to use">
+	<p>The following code shows a simple widget using QClickManager:</p>
+
+	<code lang="C++" title="Example of usage"><![CDATA[
+#include <QClickManager.hpp>
+class ClickWidgetTest: public QWidget
+{
+    Q_OBJECT
+public:
+    explicit ClickWidgetTest( QWidget* parent=nullptr): QWidget(parent)
+    {
+        m_clickManager.enableHover(*this);
+
+        connect(&m_clickManager, &Escain::QClickManager::clicked,
+        [this](const QPointF&, const std::unordered_set<size_t>&)
+        {
+            if (isEnabled()) qDebug() << "Clicked";
+        });
+
+        connect(&m_clickManager, &Escain::QClickManager::pressed,
+        [this](const QPointF&, bool pressed)
+        {
+            if (isEnabled()) 
+                qDebug() << (pressed ? "Pressed" : "Released");
+        });
+
+        connect(&m_clickManager, &Escain::QClickManager::hovered,
+        [this](const QPointF& , bool hovered, const size_t , const QRectF&)
+        {
+            if (isEnabled()) 
+                qDebug() << (hovered ? "Hovered" : "Left");
+        });
+    }
+private:
+    bool event(QEvent* e)
+    {
+        if (m_clickManager.eventHandler( e )) return true;
+        return QWidget::event(e);
+    }
+
+    Escain::QClickManager m_clickManager;
+};
+		]]></code>
+		
+
+	<p>
+	</p>
+	<p>If the QClickManager is disabled during a user interaction, equivalent events can not be triggered: eg. The user press the mouse button, thus the press event is sent; the QClickManager is disabled; the user release the mouse button, but the release event is not sent because QClickManager is disabled.</p>
+	<p>The emitted event provides the cursor position relative to the widget, at the moment the click event is effective.<br/>
+	The emitted event provides the set of registered click rectangles that make effective the click (those that the cursor never left). This set may eventually be empty if no click rectangle is registered.)<br/>
+	</p>
+	</header-2>
+
+	<header-2 title="Known issues">
+	<ul>
+		<li>When the cursor goes over a child widget, no leave-event or mouse-move-event is received, consequently, it is currently not possible to detect this situation for press, click or hover management. The work-around is to make that child widget a sibling widget instead.</li>
+	</ul>
+	</header-2>
+	</header-1>
+
+	<header-1 title="QPaletteExt">
+	<header-2 title="Introduction">
+	
+	</header-2>
+	<header-2 title="Need for a Escain::ColorRoleExt">
+	<p><b>ColorRoleExt provide an extended version of Qt::ColorRole in Qt</b>.</p>
+	<p>Qt defines two dimensions for colors: ColorRole specifying the purpose of the color, like text, background, highlight, etc.. It also define the ColorGroup, which define if the widget is disabled, active, inactive, or normal. QPaletteExt, additionally defines colors for specific user interactions: hover, pressed, focus, etc. through the usage of a ColorRoleExt which combine the ColorRole with the interactions (hover, pressed, normal...): getting for example buttonText_Hover, ButtonText_Pressed, or ButtonHighlight_Normal. </p>
+	</header-2>
+	<header-2 title="Changing the OS color set">
+	<p>QPalette for a specific widget can change runtime if the Operating System color scheme changed. For this reason, it is important to <b>never save a particular QPaletteExt, but rather get a new palette each time the widget is painted</b>. Qt detects color scheme changes and will automatically triger the update of the full GUI.</p>
+	<code lang="C++" title="">
+void paintEvent(QPaintEvent* e)
+{
+    QWidget::paintEvent(e);
+
+    QPainter p(this);
+    // This get updated if OS color scheme changes runtime.
+    QPaletteExt pal(palette());
+}
+	</code>
+	</header-2>
+	<header-2 title="How to use">
+	<p>The following example shows how to use QPaletteExt in a simple custom QWidget:</p>
+	<code lang="C++" title="">
+void paintEvent(QPaintEvent* e)
+{
+    QPainter p(this);
+    p.setClipRect(e->rect());
+
+    // active/inactive/disabled already set by QWidget
+    QPaletteExt pal{QWidget::palette()};
+
+    QColor bgColor = pal.color(ColorRoleExt::Button_Normal);
+		
+    if (isEnabled())
+    {
+        if (isPressed) // you can use QClickManager for this.
+        {
+            bgColor = pal.color(ColorRoleExt::Button_Pressed);
+        }
+        else if (isHovered())
+        {
+            bgColor = pal.color(ColorRoleExt::Button_Hovered);
+        }
+    }
+    p.fillRect( rect(), bgColor);
+}
+	</code>
+	</header-2>
+	</header-1>
+</document>
